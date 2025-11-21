@@ -1,0 +1,19 @@
+<% layout('layout') %>
+    <h1>
+        <%= product ? 'Sửa sản phẩm' : 'Thêm sản phẩm' %>
+    </h1>
+    <form method="post" action="<%= product ? '/products/' + product.id + '/edit' : '/products/new' %>">
+        <div>
+            <label>Tên</label>
+            <input name="name" value="<%= product ? product.name : '' %>" required />
+        </div>
+        <div>
+            <label>Price</label>
+            <input name="price" type="number" step="0.01" value="<%= product ? product.price : 0 %>" />
+        </div>
+        <div>
+            <label>Description</label>
+            <textarea name="description"><%= product ? product.description : '' %></textarea>
+        </div>
+        <button type="submit">Lưu</button>
+    </form>
