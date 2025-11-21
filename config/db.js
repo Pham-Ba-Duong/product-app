@@ -1,13 +1,15 @@
+// config/db.js
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+// Sequelize config sử dụng đúng biến môi trường Railway
 const sequelize = new Sequelize(
-  process.env.DB_NAME,      // railway
-  process.env.DB_USER,      // root
-  process.env.DB_PASS,      // mật khẩu MySQL
+  process.env.MYSQL_DATABASE,   // Tên database trên Railway
+  process.env.MYSQLUSER,        // User MySQL
+  process.env.MYSQLPASSWORD,    // Password MySQL
   {
-    host: process.env.DB_HOST,  // mysql.railway.internal
-    port: process.env.DB_PORT || 3306,
+    host: process.env.MYSQLHOST,      // Host MySQL
+    port: process.env.MYSQLPORT || 3306, // Port MySQL
     dialect: 'mysql',
     logging: false,
     pool: {
