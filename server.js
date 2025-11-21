@@ -1,106 +1,69 @@
-// server.js
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2/promise");
+const db = require("./db");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-let db;
+// 🟢 GET all products
+app.get("/products", (req, res) => {
+  db.query("SELECT * FROM products", (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+});
 
-async function connectDB() {
-  try {
-    const dbUrl = process.env.MYSQL_URL;
-    if (!dbUrl) throw new Error("MYSQL_URL chưa được cấu hình trên Railway!");
+// 🔵 Search product
+app.get("/products/search", (req, res) => {
+  const q = `%${req.query.q}%`;
+  db.query("SELECT * FROM products WHERE name LIKE ?", [q], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+});
 
-    db = await mysql.createConnection(dbUrl);
-    console.log("✅ Đã kết nối Database MySQL!");
-  } catch (err) {
-    console.error("❌ Lỗi kết nối Database:", err.message);
-  }
-}
+// 🟡 Add product
+app.post("/products", (req, res) => {
+  const { name, price, description } = req.body;
 
-// Tạo bảng products nếu chưa có
-async function initDB() {
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS products (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      description TEXT,
-      price DECIMAL(10,2) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-}
-
-// ======================
-// CRUD Sản phẩm
-// ======================
-app.get("/", (req, res) => res.send("🚀 Backend đang chạy!"));
-
-app.get("/products", async (req, res) => {
-  try {
-    const { search } = req.query;
-    let sql = "SELECT * FROM products";
-    const params = [];
-    if (search) {
-      sql += " WHERE name LIKE ? OR description LIKE ?";
-      params.push(`%${search}%`, `%${search}%`);
+  db.query(
+    "INSERT INTO products (name, price, description) VALUES (?, ?, ?)",
+    [name, price, description],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ id: result.insertId, name, price, description });
     }
-    const [rows] = await db.execute(sql, params);
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  );
 });
 
-app.post("/products", async (req, res) => {
-  try {
-    const { name, description, price } = req.body;
-    const [result] = await db.execute(
-      "INSERT INTO products (name, description, price) VALUES (?, ?, ?)",
-      [name, description, price]
-    );
-    res.json({ id: result.insertId, name, description, price });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// 🟠 Update product
+app.put("/products/:id", (req, res) => {
+  const id = req.params.id;
+  const { name, price, description } = req.body;
+
+  db.query(
+    "UPDATE products SET name=?, price=?, description=? WHERE id=?",
+    [name, price, description, id],
+    (err) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ message: "Updated successfully" });
+    }
+  );
 });
 
-app.put("/products/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description, price } = req.body;
-    await db.execute(
-      "UPDATE products SET name = ?, description = ?, price = ? WHERE id = ?",
-      [name, description, price, id]
-    );
-    res.json({ id, name, description, price });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// 🔴 Delete product
+app.delete("/products/:id", (req, res) => {
+  const id = req.params.id;
+
+  db.query("DELETE FROM products WHERE id=?", [id], (err) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json({ message: "Deleted successfully" });
+  });
 });
 
-app.delete("/products/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await db.execute("DELETE FROM products WHERE id = ?", [id]);
-    res.json({ message: "Deleted", id });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Server is running on Railway!");
 });
-
-// ======================
-// Khởi động server
-// ======================
-async function startServer() {
-  await connectDB();
-  await initDB();
-
-  const PORT = process.env.PORT || 8080;
-  app.listen(PORT, () => console.log(`🚀 Server chạy tại http://localhost:${PORT}`));
-}
-
-startServer();
