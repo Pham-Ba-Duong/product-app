@@ -30,14 +30,14 @@
             <button class="button-btn">x</button>
           </a>
           <form
-            action="/category/update/<%= category._id %>"
+            action="/category/update/<%= category.id %>"
             method="PUT"
             id="updateCategoryForm"
           >
             <input
               type="hidden"
               id="categoryItem"
-              value="<%= category._id %>"
+              value="<%= category.id %>"
             />
             <div class="form-group">
               <label for="category-name">Category Name</label>
@@ -68,22 +68,22 @@
         .getElementById("updateCategoryForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
-
+    
           const categoryId = document.getElementById("categoryItem").value;
           const categoryName = document.getElementById("category-name").value;
-
+    
           try {
             const response = await fetch(
-              `http://localhost:8000/category/update/${categoryId}`,
+              `/api/categories/${categoryId}`,
               {
                 method: "PUT",
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ categoryName }),
+                body: JSON.stringify({ name: categoryName }),
               }
             );
-
+    
             if (response.ok) {
               alert("Update category success");
               window.location.href = "/admin/manage-category";

@@ -54,34 +54,33 @@
 
     <script>
       //Tạo mới category
-       const createCategory = async () => {
-        const category = document.getElementById('categoryName').value;
-
+      const createCategory = async () => {
+        const categoryName = document.getElementById('categoryName').value;
+    
         try {
-          const categoryApi = "http://localhost:8000/category/create";
-          const response = await fetch(categoryApi, {
+          const response = await fetch("/api/categories", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ categoryName: category }),
+            body: JSON.stringify({ name: categoryName }),
           });
-
+    
           if (response.ok) {
             alert("Create category success");
             window.location.href = `/admin/manage-category`;
           } else {
             const error = await response.json();
-            alert(`Error: ${error.error || "Unknown error occurred"}`);
+            alert(`Error: ${error.message || "Unknown error occurred"}`);
           }
         } catch (error) {
-          console.error('Error submitting comment:', error);
+          console.error('Error creating category:', error);
           alert("An unexpected error occurred.");
         }
       };
-
-        document.querySelector('#submit').addEventListener('click', (event) => {
-          event.preventDefault();
-          createCategory();
-        });
+    
+      document.querySelector('#submit').addEventListener('click', (event) => {
+        event.preventDefault();
+        createCategory();
+      });
     </script>
   </body>
 </html>

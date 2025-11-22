@@ -27,7 +27,7 @@
         </header>
         <!-- ! Main -->
         <div>
-          <h2 class="main-title">Post Category</h2>
+          <h2 class="main-title">Product Category</h2>
           <a href="/admin/manage-category/create">
             <button class="button-btn">New Category</button>
           </a>
@@ -64,30 +64,28 @@
       document.addEventListener("DOMContentLoaded", function() {
         getPopularCategoryDataAdmin();
       });
-  
+    
       const getPopularCategoryDataAdmin = async () => {
           try {
-              const categoryApi = "http://localhost:8000/v1/category";
-
-              const response = await fetch(categoryApi);
+              const response = await fetch("/api/categories");
               const categories = await response.json();
-
+    
               const htmlCategoryAdmin = categories.map(
                   (item) => { 
                     const createdAt = new Date(item.createdAt).toLocaleDateString();
                     return `
-                      <tr id="trow_${item._id}">
+                      <tr id="trow_${item.id}">
                           <td>${item.name}</td>
                           <td>${createdAt}</td>
                           <td>
-                            <a href="/category/update/${item._id}" id="edit" data-id=${item._id}><button class="btn btn-edit">Edit</button></a> | 
-                            <a href="" id="delete" data-id=${item._id}><button class="btn btn-delete">Delete</button> </a>
+                            <a href="/update/${item.id}" id="edit" data-id=${item.id}><button class="btn btn-edit">Edit</button></a> | 
+                            <a href="" id="delete" data-id=${item.id}><button class="btn btn-delete">Delete</button> </a>
                           </td>
                       </tr>
                   `
           }).join("");
             document.querySelector("#list-category-admin").innerHTML = htmlCategoryAdmin;
-
+    
             //Click update
             document.querySelectorAll(".btn-edit").forEach((button) => {
             button.addEventListener("click", (e) => {
@@ -97,7 +95,7 @@
                 }
               });
             });
-
+    
             // Click delete
             document.querySelectorAll(".btn-delete").forEach((button) => {
               button.addEventListener("click", async (e) => {
@@ -114,19 +112,19 @@
               console.log("Error fetching category data:", error);
           }
       };
-  
-
+    
+    
       const deleteCategory = async (categoryId) => {
         try {        
           const confirmDelete = confirm(
             "Are you sure you want to delete this category?"
           );
           if (!confirmDelete) return;
-
-          const response = await fetch(`/category/delete/${categoryId}`, {
+    
+          const response = await fetch(`/api/categories/${categoryId}`, {
             method: "DELETE",
           });
-
+    
           if (response.ok) {
             document.getElementById(`trow_${categoryId}`).remove();
             alert("Category deleted successfully!");

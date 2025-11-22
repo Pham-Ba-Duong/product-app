@@ -65,6 +65,20 @@ app.get("/", requireAdmin, (req, res) => {
   res.redirect("/admin");
 });
 
+//Lấy trang update category với id đó
+app.get("/category/update/:id", requireAdmin, async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id);
+    if (!category) {
+      return res.status(404).send("Không tìm thấy danh mục!");
+    }
+    res.render("category-edit", { category }); // render EJS + truyền dữ liệu
+  } catch (error) {
+    console.error("Lỗi load trang edit category:", error);
+    res.status(500).send("Lỗi server");
+  }
+});
+
 // ===== Tạo tài khoản admin mặc định =====
 async function createDefaultAdmin() {
   try {
@@ -105,3 +119,5 @@ sequelize
   .catch((err) => {
     console.error("Lỗi kết nối database:", err);
   });
+
+
