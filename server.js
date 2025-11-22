@@ -21,10 +21,10 @@ const AuthRoutes = require("./routes/auth.routes");
 const ProductRoutes = require("./routes/product.routes");
 const CategoryRoutes = require("./routes/category.routes");
 
-// Middleware bảo vệ admin
+// Middleware
 const { requireAdmin, isLoggedIn } = require("./middleware/auth");
 
-// Cloudinary config
+// Config Cloudinary (vẫn cần để lấy thông tin account, nhưng unsigned preset dùng cho upload)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -32,7 +32,7 @@ cloudinary.config({
   secure: true,
 });
 
-// Multer: dùng memory storage để upload lên Cloudinary trực tiếp
+// Multer memory storage (không tạo file temp)
 const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
@@ -46,36 +46,34 @@ app.use(cors());
 app.use(methodOverride("_method"));
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "super-secret-key-2025",
+    secret: process.env.SESSION_SECRET || "super-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
   })
 );
 
-// View engine
+// View Engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "assets")));
 
-// Routes
+// Auth & admin routes
 app.get("/login", isLoggedIn, (req, res) => res.render("login", { error: null }));
 app.use("/auth", AuthRoutes);
 app.use("/admin", requireAdmin, AdminRoutes);
 
-// API công khai với upload memory
+// Public API routes
 app.use("/v1/products", upload.single("imageFile"), ProductRoutes);
 app.use("/v1/categories", CategoryRoutes);
 
-// Trang chủ redirect
+// Redirect root
 app.get("/", requireAdmin, (req, res) => res.redirect("/admin"));
 
-// Trang edit product
+// Product edit page
 app.get("/admin/product/update/:id", requireAdmin, async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id, {
-      include: { model: Category, as: "category" },
-    });
+    const product = await Product.findByPk(req.params.id, { include: { model: Category, as: "category" } });
     if (!product) return res.status(404).send("Không tìm thấy sản phẩm");
     res.render("product-edit", { product });
   } catch (err) {
@@ -84,26 +82,21 @@ app.get("/admin/product/update/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Tạo admin mặc định
+// Tạo default admin
 async function createDefaultAdmin() {
   try {
     const [admin, created] = await Admin.findOrCreate({
       where: { name: "admin" },
       defaults: { name: "admin", password: "admin123", role: "admin" },
     });
-    if (created) console.log("Tài khoản admin mặc định đã được tạo: admin/admin123");
-    else console.log("Admin đã tồn tại");
+    if (created) console.log("Tạo admin mặc định: admin / admin123");
   } catch (err) {
     console.error("Lỗi tạo admin mặc định:", err);
   }
 }
 
-// Khởi động server
-sequelize
-  .sync({ alter: true })
-  .then(async () => {
-    console.log("Kết nối MySQL thành công!");
-    await createDefaultAdmin();
-    app.listen(PORT, () => console.log(`Server chạy tại http://localhost:${PORT}`));
-  })
-  .catch((err) => console.error("Lỗi kết nối database:", err));
+// Start server
+sequelize.sync({ alter: true }).then(async () => {
+  await createDefaultAdmin();
+  app.listen(PORT, () => console.log(`Server chạy tại http://localhost:${PORT}`));
+});
