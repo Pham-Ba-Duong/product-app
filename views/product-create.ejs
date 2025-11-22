@@ -1,138 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Product</title>
-
-    <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
-    <link rel="stylesheet" href="/asset-admin/css/style.css" />
-
-    <!-- CKEditor -->
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        feather.replace();
-      });
-    </script>
-  </head>
-
-
-  <body>
-    <div class="page-flex">
-      <%- include('./partials/sidebar-admin') %>
-
-      <div class="main-wrapper">
-        <header><%- include('./partials/header-admin') %></header>
-
-        <div class="container">
-          <h2 class="main-title">Create New Product</h2>
-
-          <div class="form-wrapper">
-            <form id="createForm" enctype="multipart/form-data">
-              <div class="form-group">
-                <label>Name</label>
-                <input type="text" name="name" id="name" required />
-              </div>
-
-              <div class="form-group">
-                <label>Price</label>
-                <input type="number" name="price" id="price" required />
-              </div>
-
-              <div class="form-group">
-                <label>Category</label>
-                <select name="categoryId" id="categoryId" required>
-                  <option value="">Loading...</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Description</label>
-                <textarea id="editor" name="description"></textarea>
-              </div>
-
-              <div class="form-group">
-                <label>Image</label>
-                <input type="file" name="imageFile" id="imageFile" accept="image/*" required />
-              </div>
-
-              <button type="submit" class="button-btn">Create</button>
-            </form>
-          </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Product</title>
+  <link rel="stylesheet" href="/asset-admin/css/style.css" />
+  <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+</head>
+<body>
+<div class="page-flex">
+  <%- include('./partials/sidebar-admin') %>
+  <div class="main-wrapper">
+    <header><%- include('./partials/header-admin') %></header>
+    <div class="container">
+      <h2>Create Product</h2>
+      <form id="createForm" enctype="multipart/form-data">
+        <div>
+          <label>Name</label>
+          <input type="text" id="name" required />
         </div>
-
-        <footer class="footer"><%- include('./partials/footer-admin') %></footer>
-      </div>
+        <div>
+          <label>Price</label>
+          <input type="number" id="price" required />
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="categoryId" required></select>
+        </div>
+        <div>
+          <label>Description</label>
+          <textarea id="description"></textarea>
+        </div>
+        <div>
+          <label>Image</label>
+          <input type="file" id="imageFile" accept="image/*" required />
+        </div>
+        <button type="submit">Create</button>
+      </form>
     </div>
+    <footer><%- include('./partials/footer-admin') %></footer>
+  </div>
+</div>
 
-    <script src="/asset-admin/js/script.js"></script>
-    <script>
-      CKEDITOR.replace('description', {
-        height: 300,
-        on: {
-          instanceReady: function() {
-            this.container.hide();
-            this.container.show();
-          }
-        }
-      });
-    </script>
+<script>
+CKEDITOR.replace('description');
 
-    <script>
-      // Load categories
-      document.addEventListener("DOMContentLoaded", async () => {
-        await loadCategories();
-        CKEDITOR.replace("editor");
-      });
+async function loadCategories() {
+  const res = await fetch('/v1/categories');
+  const categories = await res.json();
+  const select = document.getElementById('categoryId');
+  select.innerHTML = '';
+  categories.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name;
+    select.appendChild(opt);
+  });
+}
 
-      const loadCategories = async () => {
-        try {
-          const res = await fetch("/v1/categories");
-          const categories = await res.json();
+document.addEventListener('DOMContentLoaded', () => {
+  loadCategories();
 
-          const select = document.getElementById("categoryId");
-          select.innerHTML = "";
+  const form = document.getElementById('createForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('name').value);
+    formData.append('price', document.getElementById('price').value);
+    formData.append('categoryId', document.getElementById('categoryId').value);
+    formData.append('description', CKEDITOR.instances.description.getData());
+    formData.append('imageFile', document.getElementById('imageFile').files[0]);
 
-          categories.forEach((c) => {
-            const opt = document.createElement("option");
-            opt.value = c.id;
-            opt.textContent = c.name;
-            select.appendChild(opt);
-          });
-        } catch (err) {
-          console.error("Error load category", err);
-        }
-      };
+    const res = await fetch('/v1/products', {
+      method: 'POST',
+      body: formData
+    });
 
-      // Handle submit
-      const form = document.getElementById("createForm");
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append("name", document.getElementById("name").value);
-        formData.append("price", document.getElementById("price").value);
-        formData.append("categoryId", document.getElementById("categoryId").value);
-        formData.append("description", CKEDITOR.instances.editor.getData());
-        formData.append("imageFile", document.getElementById("imageFile").files[0]);
-
-        const res = await fetch("/v1/products", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (res.ok) {
-          alert("Product created successfully!");
-          window.location.href = "/admin/product";
-        } else {
-          const err = await res.json();
-          console.error(err);
-          alert("Failed to create product!");
-        }
-      });
-    </script>
-  </body>
+    if (res.ok) {
+      alert('Product created!');
+      window.location.href = '/admin/product';
+    } else {
+      const err = await res.json();
+      console.error(err);
+      alert('Failed to create product: ' + err.message);
+    }
+  });
+});
+</script>
+</body>
 </html>
