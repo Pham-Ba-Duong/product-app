@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Product</title>
-    <link
-      rel="shortcut icon"
-      href="/asset-admin/img/svg/logo.svg"
-      type="image/x-icon"
-    />
-    <link rel="stylesheet" href="/asset-admin/css/style.css" />
-  </head>
 
-  <body>
-    <div class="layer"></div>
-    <!-- ! Body -->
-    <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Product</title>
+  <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
+  <link rel="stylesheet" href="/asset-admin/css/style.css" />
+</head>
 
-    <div class="page-flex">
-      <!-- ! Sidebar -->
-      <%- include('./partials/sidebar-admin')%>
+<body>
+  <div class="layer"></div>
+  <!-- ! Body -->
+  <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+
+  <div class="page-flex">
+    <!-- ! Sidebar -->
+    <%- include('./partials/sidebar-admin')%>
       <div class="main-wrapper">
         <!-- ! Header -->
         <header><%- include('./partials/header-admin')%></header>
@@ -30,73 +27,36 @@
             <a href="/admin/manage-post">
               <button class="button-btn">x</button>
             </a>
-            <form
-              action="/post/update/<%= post._id %>"
-              id="updatePostForm"
-              enctype="multipart/form-data"
-              method="PUT"
-            >
-              <input type="hidden" id="postItem" value="<%= post._id %>" />
+            <form action="/v1/products/<%= product.id %>" id="updateProductForm" enctype="multipart/form-data"
+              method="PUT">
+              <input type="hidden" id="productId" value="<%= product.id %>" />
               <div class="form-group">
-                <label for="title">Product Name</label>
-                <div class="bnt"></div>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value="<%= post.title %>" 
-                  required
-                  placeholder="Enter title here"
-                />
+                <label for="name">Product Name</label>
+                <input type="text" id="name" name="name" value="<%= product.name %>" required
+                  placeholder="Enter name here" />
               </div>
 
               <div class="form-group">
-                <label for="txaContent"></label>
-                <div class="bnt"></div>
-                <textarea
-                  id="txaContent"
-                  name="txaContent"
-                  rows="5"
-                  value="<%= post.content %>"
-                  required
-                  placeholder="Write your content here..."
-                >
-                  <%= post.content %>
-                </textarea>
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" required><%= product.description %></textarea>
               </div>
 
               <div class="form-group">
-                <label for="image">Product Image</label>
-                <div class="bnt"></div>
-                <input
-                  type="file"
-                  id="imageFile"
-                  name="imageFile"
-                  accept="image/*"
-                />
+                <label for="imageFile">Product Image</label>
+                <input type="file" id="imageFile" name="imageFile" accept="image/*" />
+                <p>Current image: <img src="<%= product.image %>" alt="current" width="100" /> (<a
+                    href="<%= product.image %>" target="_blank">View</a>)</p>
               </div>
 
               <div class="form-group">
                 <label for="price">Price</label>
-                <div class="bnt"></div>
-                <input
-                  type="integer"
-                  id="price"
-                  name="price"
-                  required
-                  placeholder="Enter Price here"
-                />
+                <input type="number" id="price" name="price" value="<%= product.price %>" required
+                  placeholder="Enter Price here" />
               </div>
 
               <div class="form-group">
-                <label for="category">Category</label>
-                <div class="bnt"></div>
-                <select
-                  id="category"
-                  name="category"
-                  value="<%= post.category %>"
-                  required
-                ></select>
+                <label for="categoryId">Category</label>
+                <select id="categoryId" name="categoryId" required></select>
               </div>
 
               <div class="form-group">
@@ -108,80 +68,86 @@
         <!-- ! Footer -->
         <footer class="footer"><%- include('./partials/footer-admin')%></footer>
       </div>
-    </div>
+  </div>
 
-    <script src="/asset-admin/plugins/chart.min.js"></script>
-    <script src="/asset-admin/plugins/feather.min.js"></script>
-    <script src="/asset-admin/js/script.js"></script>
-    <script src="/asset-admin/ckeditor/ckeditor.js"></script>
-    <script>
-      CKEDITOR.replace("txaContent", {
-        uiColor: "#9AB8F3",
-        extraPlugins: "filebrowser,uploadimage",
-        filebrowserBrowseUrl: "/browse",
-        filebrowserUploadMethod: "form",
-        filebrowserUploadUrl: "/uploadfile",
-        removePlugins: "exportpdf",
-        language: "vi",
-      });
+  <script src="/asset-admin/plugins/chart.min.js"></script>
+  <script src="/asset-admin/plugins/feather.min.js"></script>
+  <script src="/asset-admin/js/script.js"></script>
+  <script src="/asset-admin/ckeditor/ckeditor.js"></script>
+  <script>
+    CKEDITOR.replace("txaContent", {
+      uiColor: "#9AB8F3",
+      extraPlugins: "filebrowser,uploadimage",
+      filebrowserBrowseUrl: "/browse",
+      filebrowserUploadMethod: "form",
+      filebrowserUploadUrl: "/uploadfile",
+      removePlugins: "exportpdf",
+      language: "vi",
+    });
+  </script>
 
-      document.addEventListener("DOMContentLoaded", function () {
-        getCategoryData();
-      });
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    getCategoryData();
+  });
 
+  const getCategoryData = async () => {
+    try {
+      const categoryApi = "http://localhost:3000/v1/categories";
+      const response = await fetch(categoryApi);
+      const categories = await response.json();
 
-      const getCategoryData = async () => {
-        try {
-          const categoryApi = "http://localhost:8000/v1/category";
+      // Cú pháp đúng, an toàn 100% - không bọc dấu nháy!
+      const currentCategoryId = <%- JSON.stringify(product.categoryId || null) %>;
 
-          const response = await fetch(categoryApi);
-          const categories = await response.json();
+      const select = document.querySelector("#categoryId");
+      select.innerHTML = "";  // Xóa option cũ nếu có
 
-          const htmlCategoryAdmin = categories
-            .map(
-              (item) => `
-                 <option value="${item._id}">${item.name}</option>
-              `
-            )
-            .join("");
-          document.querySelector("#category").innerHTML += htmlCategoryAdmin;
-
-          feather.replace();
-        } catch (error) {
-          console.error("Error fetching category data:", error);
+      // Tạo option bằng DOM để tránh lỗi EJS
+      categories.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = item.name;
+        if (item.id === currentCategoryId) {
+          option.selected = true;
         }
-      };
+        select.appendChild(option);
+      });
 
-      document
-        .getElementById("updatePostForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      alert('Error loading categories');
+    }
+  };
 
-          const form = document.getElementById("updatePostForm");
-          const formData = new FormData(form); 
+  document.getElementById("updateProductForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-          const postId = document.getElementById("postItem").value;
+    const form = document.getElementById("updateProductForm");
+    const formData = new FormData(form);
 
-          try {
-            const response = await fetch(
-              `http://localhost:8000/post/update/${postId}`,
-              {
-                method: "PUT",
-                body: formData, 
-              }
-            );
+    const productId = document.getElementById("productId").value;
 
-            if (response.ok) {
-              alert("Update post success");
-              window.location.href = "/admin/manage-post";
-            } else {
-              const errorData = await response.json();
-              alert(`Error: ${errorData.message || "Unknown error occurred"}`);
-            }
-          } catch (error) {
-            console.error("Error updating post:", error);
-          }
-        });
-    </script>
-  </body>
+    try {
+      const response = await fetch(`http://localhost:3000/v1/products/${productId}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert("Update product success");
+        window.location.href = "/admin/manage-product";
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.message || "Unknown error occurred"}`);
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+      alert('Error updating product');
+    }
+  });
+</script>
+
+</body>
+
 </html>

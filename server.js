@@ -8,7 +8,9 @@ const cors = require("cors");
 
 const sequelize = require("./config/db");
 
+const Admin = require("./models/Admin");
 const Category = require("./models/Category");
+const Product = require("./models/Product");
 
 // Routes
 const AdminRoutes = require("./routes/admin.routes");
@@ -19,8 +21,25 @@ const CategoryRoutes = require("./routes/category.routes");
 // Middleware bảo vệ admin
 const { requireAdmin, isLoggedIn } = require("./middleware/auth");
 
-// Models
-const Admin = require("./models/Admin");
+// Config Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
+// Multer: lưu tạm file vào assets/temp trước khi upload lên Cloudinary
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const tempDir = path.join(__dirname, "assets", "temp");
+    cb(null, tempDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,9 +62,8 @@ app.use(
 // ===== View Engine =====
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "assets"))); // assets, ckeditor, img, etc.
-
-// ===== Routes =====
+app.use(express.static(path.join(__dirname, "assets"))); 
+app.use("/uploads", express.static(path.join(__dirname, "assets", "temp")));
 
 // Trang login
 app.get("/login", isLoggedIn, (req, res) => {
@@ -59,7 +77,7 @@ app.use("/auth", AuthRoutes);
 app.use("/admin", requireAdmin, AdminRoutes);
 
 // API công khai
-app.use("/api/products", ProductRoutes);
+app.use("/api/products", upload.single("imageFile"), ProductRoutes);
 app.use("/api/categories", CategoryRoutes);
 
 // Redirect trang chủ
@@ -68,7 +86,7 @@ app.get("/", requireAdmin, (req, res) => {
 });
 
 //Lấy trang update category với id đó
-app.get("/category/update/:id", requireAdmin, async (req, res) => {
+app.get("/admin/category/update/:id", requireAdmin, async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) {
@@ -77,6 +95,19 @@ app.get("/category/update/:id", requireAdmin, async (req, res) => {
     res.render("category-edit", { category });
   } catch (error) {
     console.error("Lỗi load trang edit category:", error);
+    res.status(500).send("Lỗi server");
+  }
+});
+
+app.get("/admin/product/update/:id", requireAdmin, async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id, {
+      include: { model: Category, as: "category" },
+    });
+    if (!product) return res.status(404).send("Không tìm thấy sản phẩm");
+    res.render("product-edit", { product });
+  } catch (err) {
+    console.error(err);
     res.status(500).send("Lỗi server");
   }
 });

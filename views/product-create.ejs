@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>New Product</title>
-    <link
-      rel="shortcut icon"
-      href="/asset-admin/img/svg/logo.svg"
-      type="image/x-icon"
-    />
-    <link rel="stylesheet" href="/asset-admin/css/style.css" />
-  </head>
 
-  <body>
-    <div class="layer"></div>
-    <!-- ! Body -->
-    <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Product</title>
+  <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
+  <link rel="stylesheet" href="/asset-admin/css/style.css" />
+</head>
 
-    <div class="page-flex">
-      <!-- ! Sidebar -->
-      <%- include('./partials/sidebar-admin')%>
+<body>
+  <div class="layer"></div>
+  <!-- ! Body -->
+  <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+
+  <div class="page-flex">
+    <!-- ! Sidebar -->
+    <%- include('./partials/sidebar-admin')%>
       <div class="main-wrapper">
         <!-- ! Header -->
         <header><%- include('./partials/header-admin')%></header>
@@ -30,60 +27,32 @@
             <a href="/admin/manage-post">
               <button class="button-btn">x</button>
             </a>
-            <form action="http://localhost:8000/post/create" id="createPostForm" enctype="multipart/form-data" method="POST">
+            <form action="/v1/products" id="createProductForm" enctype="multipart/form-data" method="POST">
               <div class="form-group">
                 <label for="name">Product Name</label>
-                <div class="bnt"></div>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  placeholder="Enter name here"
-                />
+                <input type="text" id="name" name="name" required placeholder="Enter name here" />
               </div>
-
+            
               <div class="form-group">
-                <label for="txaContent">Description</label>
-                <div class="bnt"></div>
-                <textarea
-                  id="txaContent"
-                  name="txaContent"
-                  rows="5"
-                  required
-                  placeholder="Write your content here..."
-                ></textarea>
+                <label for="description">Description</label>  
+                <textarea id="description" name="description" rows="5" required placeholder="Write your content here..."></textarea>
               </div>
-
+            
               <div class="form-group">
-                <label for="image">Product Image</label>
-                <div class="bnt"></div>
-                <input
-                  type="file"
-                  id="imageFile"
-                  name="imageFile"
-                  accept="image/*"
-                />
+                <label for="imageFile">Product Image</label>
+                <input type="file" id="imageFile" name="imageFile" accept="image/*" />
               </div>
-
-              <div class="form-group">
-                <label for="category">Category</label>
-                <div class="bnt"></div>
-                <select id="category" name="category" required></select>
-              </div>
-
+            
               <div class="form-group">
                 <label for="price">Price</label>
-                <div class="bnt"></div>
-                <input
-                  type="integer"
-                  id="price"
-                  name="price"
-                  required
-                  placeholder="Enter Price here"
-                />
+                <input type="number" id="price" name="price" required placeholder="Enter Price here" />  
               </div>
-
+            
+              <div class="form-group">
+                <label for="categoryId">Category</label>  
+                <select id="categoryId" name="categoryId" required></select>
+              </div>
+            
               <div class="form-group">
                 <button type="submit" class="submit-btn">Publish Product</button>
               </div>
@@ -93,83 +62,73 @@
         <!-- ! Footer -->
         <footer class="footer"><%- include('./partials/footer-admin')%></footer>
       </div>
-    </div>
-    <!-- Chart library -->
-    <script src="/asset-admin/plugins/chart.min.js"></script>
-    <!-- Icons library -->
-    <script src="/asset-admin/plugins/feather.min.js"></script>
-    <!-- Custom scripts -->
-    <script src="/asset-admin/js/script.js"></script>
-    <!-- CKEditer -->
-    <script src="/asset-admin/ckeditor/ckeditor.js"></script>
-    <script>
-      CKEDITOR.replace("txaContent", {
-        uiColor: "#9AB8F3",
-        extraPlugins: "filebrowser,uploadimage",
-        filebrowserBrowseUrl: "/browse",
-        filebrowserUploadMethod: "form",
-        filebrowserUploadUrl: "/uploadfile",
-        removePlugins: "exportpdf",
-        language: "vi",
-      });
-    </script>
+  </div>
+  <!-- Chart library -->
+  <script src="/asset-admin/plugins/chart.min.js"></script>
+  <!-- Icons library -->
+  <script src="/asset-admin/plugins/feather.min.js"></script>
+  <!-- Custom scripts -->
+  <script src="/asset-admin/js/script.js"></script>
+  <!-- CKEditer -->
+  <script src="/asset-admin/ckeditor/ckeditor.js"></script>
+  <script>
+    CKEDITOR.replace("txaContent", {
+      uiColor: "#9AB8F3",
+      extraPlugins: "filebrowser,uploadimage",
+      filebrowserBrowseUrl: "/browse",
+      filebrowserUploadMethod: "form",
+      filebrowserUploadUrl: "/uploadfile",
+      removePlugins: "exportpdf",
+      language: "vi",
+    });
+  </script>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        getPopularCategoryDataAdmin();
-      });
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      getCategoryData();
+    });
 
-      const getPopularCategoryDataAdmin = async () => {
-        try {
-          const categoryApi = "http://localhost:8000/v1/category";
+    const getCategoryData = async () => {
+      try {
+        const categoryApi = "http://localhost:3000/v1/categories";
+        const response = await fetch(categoryApi);
+        const categories = await response.json();
 
-          const response = await fetch(categoryApi);
-          const categories = await response.json();
+        const htmlCategoryAdmin = categories.map((item) => `
+      <option value="$$ {item.id}"> $${item.name}</option>
+    `).join("");
+        document.querySelector("#categoryId").innerHTML += htmlCategoryAdmin;
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        alert('Error loading categories');
+      }
+    };
 
-          const htmlCategoryAdmin = categories
-            .map(
-              (item) => `
-                 <option value="${item._id}">${item.name}</option>
-              `
-            )
-            .join("");
-          document.querySelector("#category").innerHTML += htmlCategoryAdmin;
+    document.getElementById("createProductForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
 
-          feather.replace();
-        } catch (error) {
-          console.error("Error fetching category data:", error);
-        }
-      };
+      const form = document.getElementById("createProductForm");
+      const formData = new FormData(form);
 
-      document
-        .getElementById("createPostForm")
-        .addEventListener("submit", async (event) => {
-          event.preventDefault();
-
-          for (let instance in CKEDITOR.instances) {
-            CKEDITOR.instances[instance].updateElement();
-          }
-
-          const form = document.getElementById("createPostForm");
-          const formData = new FormData(form);
-
-          try {
-            const response = await fetch("http://localhost:8000/post/create", {
-              method: "POST",
-              body: formData
-            });
-
-            if (response.ok) {
-              alert("Create post success");
-              window.location.href = "/admin/manage-post";
-            } else {
-              const errorData = await response.json();
-              alert(`Error: ${errorData.message || "Unknown error occurred"}`);
-            }
-          } catch (error) {
-            console.error("Error creating post:", error);
-          }
+      try {
+        const response = await fetch("http://localhost:3000/v1/products", {
+          method: "POST",
+          body: formData
         });
-    </script>
-  </body>
+
+        if (response.ok) {
+          alert("Create product success");
+          window.location.href = "/admin/manage-product";
+        } else {
+          const errorData = await response.json();
+          alert(`Error: ${errorData.message || "Unknown error occurred"}`);
+        }
+      } catch (error) {
+        console.error("Error creating product:", error);
+        alert('Error creating product');
+      }
+    });
+  </script>
+</body>
+
 </html>
