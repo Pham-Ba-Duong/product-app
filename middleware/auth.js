@@ -1,4 +1,4 @@
-// middleware/auth.js
+// Bắt buộc admin đã login mới truy cập
 const requireAdmin = (req, res, next) => {
     if (!req.session.admin) {
       return res.redirect('/login');
@@ -6,6 +6,7 @@ const requireAdmin = (req, res, next) => {
     next();
   };
   
+  // Nếu đã login thì không được vào login page nữa
   const isLoggedIn = (req, res, next) => {
     if (req.session.admin) {
       return res.redirect('/admin');
@@ -14,3 +15,4 @@ const requireAdmin = (req, res, next) => {
   };
   
   module.exports = { requireAdmin, isLoggedIn };
+  
