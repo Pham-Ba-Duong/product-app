@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Post</title>
+    <title>Edit Product</title>
     <link
       rel="shortcut icon"
       href="/asset-admin/img/svg/logo.svg"
@@ -27,16 +27,16 @@
         <!-- ! Main -->
         <div class="container">
           <div class="form-container">
-            <a href="/admin/manage-post">
+            <a href="/admin/manage-procduct">
               <button class="button-btn">x</button>
             </a>
             <form
-              action="/post/update/<%= product.id %>"
+              action="/product/update/<%= product.id %>"
               id="updateForm"
               enctype="multipart/form-data"
               method="PUT"
             >
-              <input type="hidden" id="postItem" value="<%= product.id %>" />
+              <input type="hidden" id="productItem" value="<%= product.id %>" />
               <div class="form-group">
                 <label for="title">Product Name</label>
                 <div class="bnt"></div>
@@ -61,7 +61,7 @@
                   required
                   placeholder="Write your content here..."
                 >
-                  <%= post.content %>
+                  <%= product.content %>
                 </textarea>
               </div>
 
@@ -82,7 +82,7 @@
                 <select
                   id="categoryId"
                   name="categoryId"
-                  value="<%= post.category %>"
+                  value="<%= product.category %>"
                   required
                 ></select>
               </div>
