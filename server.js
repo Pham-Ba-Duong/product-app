@@ -85,7 +85,7 @@ app.get("/", requireAdmin, (req, res) => {
   res.redirect("/admin");
 });
 
-//Lấy trang update category với id đó
+//Lấy trang update category với id 
 app.get("/admin/category/update/:id", requireAdmin, async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
