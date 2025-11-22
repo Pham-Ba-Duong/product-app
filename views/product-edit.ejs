@@ -97,7 +97,7 @@
 
     const loadCategories = async () => {
       try {
-        const res = await fetch("/api/categories");
+        const res = await fetch("/v1/categories");
         const categories = await res.json();
 
         const select = document.getElementById("categoryId");
@@ -137,7 +137,7 @@
         formData.append("imageFile", document.getElementById("imageFile").files[0]);
       }
 
-      const res = await fetch(`/api/products/${productId}`, {
+      const res = await fetch(`/v1/products/${productId}`, {
         method: "PUT",
         body: formData,
       });

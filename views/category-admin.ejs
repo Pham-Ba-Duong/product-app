@@ -78,7 +78,7 @@
                           <td>${item.name}</td>
                           <td>${createdAt}</td>
                           <td>
-                            <a href="/category/update/${item.id}" id="edit" data-id=${item.id}><button class="btn btn-edit">Edit</button></a> | 
+                            <a href="/admin/category/update/${item.id}" id="edit" data-id=${item.id}><button class="btn btn-edit">Edit</button></a> | 
                             <a href="" id="delete" data-id=${item.id}><button class="btn btn-delete">Delete</button> </a>
                           </td>
                       </tr>
@@ -91,7 +91,7 @@
             button.addEventListener("click", (e) => {
                 const categoryId = e.target.closest("a").getAttribute("data-id");
                 if (categoryId) {
-                  window.location.href = `/category/update/${categoryId}`;
+                  window.location.href = `/admin/category/update/${categoryId}`;
                 }
               });
             });
