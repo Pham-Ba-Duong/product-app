@@ -1,13 +1,119 @@
-<% title = 'Login' %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đăng nhập Admin</title>
+  <link rel="stylesheet" href="/asset-admin/css/style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-box {
+      background: white;
+      padding: 40px 50px;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 420px;
+    }
+    .login-title {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-login:hover {
+      background: #5a6fd8;
+    }
+    .error {
+      background: #ffe0e0;
+      color: #d63031;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 20px;
+      border: 1px solid #fab1b1;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="logo">
+        <h1 style="color:#667eea;margin:0;">Products Admin</h1>
+      </div>
+      <h2 class="login-title">Đăng nhập quản trị</h2>
 
-<h1>Login</h1>
+      <% if (error) { %>
+        <div class="error"><%= error %></div>
+      <% } %>
 
-<% if (error) { %>
-  <p style="color:red"><%= error %></p>
-<% } %>
+      <form action="/auth/login" method="POST">
+        <div class="form-group">
+          <label for="identifier">Tên đăng nhập</label>
+          <input type="text" name="identifier" id="identifier" required placeholder="Nhập tên đăng nhập" />
+        </div>
 
-<form method="post" action="">
-  <div><label>Username or Email</label><input name="identifier" required /></div>
-  <div><label>Password</label><input type="password" name="password" required /></div>
-  <button type="submit">Login</button>
-</form>
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <input type="password" name="password" id="password" required placeholder="Nhập mật khẩu" />
+        </div>
+
+        <button type="submit" class="btn-login">Đăng nhập</button>
+      </form>
+
+      <div style="text-align:center;margin-top:20px;color:#888;font-size:14px;">
+        Chỉ dành cho quản trị viên
+      </div>
+    </div>
+  </div>
+</body>
+</html>
