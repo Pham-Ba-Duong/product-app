@@ -8,6 +8,8 @@ const cors = require("cors");
 
 const sequelize = require("./config/db");
 
+const Category = require("./models/Category");
+
 // Routes
 const AdminRoutes = require("./routes/admin.routes");
 const AuthRoutes = require("./routes/auth.routes");
@@ -72,7 +74,7 @@ app.get("/category/update/:id", requireAdmin, async (req, res) => {
     if (!category) {
       return res.status(404).send("Không tìm thấy danh mục!");
     }
-    res.render("./views/category-edit.ejs", { category }); // render EJS + truyền dữ liệu
+    res.render("category-edit", { category });
   } catch (error) {
     console.error("Lỗi load trang edit category:", error);
     res.status(500).send("Lỗi server");
