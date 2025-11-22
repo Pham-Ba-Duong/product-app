@@ -7,6 +7,7 @@ const path = require("path");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
+
 const sequelize = require("./config/db");
 
 // Models
@@ -31,9 +32,8 @@ cloudinary.config({
   secure: true,
 });
 
-// Multer memory storage
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// Multer: dùng memory storage để upload lên Cloudinary trực tiếp
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -53,52 +53,57 @@ app.use(
   })
 );
 
-// View Engine
+// View engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "assets")));
 
-// Trang login
-app.get("/login", isLoggedIn, (req, res) => {
-  res.render("login", { error: null });
-});
-
-// Auth routes
+// Routes
+app.get("/login", isLoggedIn, (req, res) => res.render("login", { error: null }));
 app.use("/auth", AuthRoutes);
-
-// Admin routes
 app.use("/admin", requireAdmin, AdminRoutes);
 
-// API routes
+// API công khai với upload memory
 app.use("/v1/products", upload.single("imageFile"), ProductRoutes);
 app.use("/v1/categories", CategoryRoutes);
 
-// Redirect home
-app.get("/", requireAdmin, (req, res) => {
-  res.redirect("/admin");
+// Trang chủ redirect
+app.get("/", requireAdmin, (req, res) => res.redirect("/admin"));
+
+// Trang edit product
+app.get("/admin/product/update/:id", requireAdmin, async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id, {
+      include: { model: Category, as: "category" },
+    });
+    if (!product) return res.status(404).send("Không tìm thấy sản phẩm");
+    res.render("product-edit", { product });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi server");
+  }
 });
 
-// Create default admin
+// Tạo admin mặc định
 async function createDefaultAdmin() {
   try {
     const [admin, created] = await Admin.findOrCreate({
       where: { name: "admin" },
       defaults: { name: "admin", password: "admin123", role: "admin" },
     });
-    if (created) console.log("Admin mặc định đã tạo: admin/admin123");
+    if (created) console.log("Tài khoản admin mặc định đã được tạo: admin/admin123");
+    else console.log("Admin đã tồn tại");
   } catch (err) {
-    console.error("Lỗi tạo admin:", err);
+    console.error("Lỗi tạo admin mặc định:", err);
   }
 }
 
-// Start server
+// Khởi động server
 sequelize
   .sync({ alter: true })
   .then(async () => {
-    console.log("MySQL connected!");
+    console.log("Kết nối MySQL thành công!");
     await createDefaultAdmin();
-    app.listen(PORT, () => {
-      console.log(`Server running: http://localhost:${PORT}`);
-    });
+    app.listen(PORT, () => console.log(`Server chạy tại http://localhost:${PORT}`));
   })
-  .catch((err) => console.error("DB connection error:", err));
+  .catch((err) => console.error("Lỗi kết nối database:", err));
