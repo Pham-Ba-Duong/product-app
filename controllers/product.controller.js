@@ -2,7 +2,7 @@ const Product = require("../models/Product");
 const Category = require("../models/Category");
 const cloudinary = require("cloudinary").v2;
 
-// Upload buffer trực tiếp lên Cloudinary với unsigned preset
+// Upload buffer trực tiếp lên Cloudinary với unsigned preset 
 const uploadToCloudinary = async (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
