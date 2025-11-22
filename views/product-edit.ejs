@@ -27,7 +27,7 @@
         <!-- ! Main -->
         <div class="container">
           <div class="form-container">
-            <a href="/admin/manage-procduct">
+            <a href="/admin/manage-product">
               <button class="button-btn">x</button>
             </a>
             <form
@@ -85,6 +85,12 @@
                   value="<%= product.category %>"
                   required
                 ></select>
+              </div>
+
+              <div class="form-group">
+                <label for="price">Price</label>
+                <div class="bnt"></div>
+                <input type="number" id="price" name="price" accept="" value="<%= product.price %>"/>
               </div>
 
               <div class="form-group">
