@@ -13,7 +13,7 @@ const uploadToCloudinary = async (filePath) => {
     fs.unlinkSync(filePath);  // Xóa file temp
     return result.secure_url;  // Trả về URL an toàn
   } catch (err) {
-    if (filePath) fs.unlinkSync(filePath);  // Xóa nếu lỗi
+    if (filePath) fs.unlinkSync(filePath);  
     throw new Error('Cloudinary upload failed: ' + err.message);
   }
 };

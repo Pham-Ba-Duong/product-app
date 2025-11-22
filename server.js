@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const methodOverride = require("method-override");
 const path = require("path");
 const cors = require("cors");
+const cloudinary = require("cloudinary").v2;
 
 const sequelize = require("./config/db");
 
@@ -44,7 +45,7 @@ const upload = multer({ storage });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ===== Middleware =====
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -59,7 +60,7 @@ app.use(
   })
 );
 
-// ===== View Engine =====
+// View Engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "assets"))); 
@@ -112,7 +113,7 @@ app.get("/admin/product/update/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// ===== Tạo tài khoản admin mặc định =====
+// Tạo tài khoản admin mặc định
 async function createDefaultAdmin() {
   try {
     const [admin, created] = await Admin.findOrCreate({
@@ -136,7 +137,7 @@ async function createDefaultAdmin() {
   }
 }
 
-// ===== Khởi động Server =====
+// Khởi động Server
 sequelize
   .sync({ alter: true })
   .then(async () => {

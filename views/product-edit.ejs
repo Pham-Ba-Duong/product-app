@@ -97,11 +97,11 @@
       const response = await fetch(categoryApi);
       const categories = await response.json();
 
-      // Cú pháp đúng, an toàn 100% - không bọc dấu nháy!
-      const currentCategoryId = <%- JSON.stringify(product.categoryId || null) %>;
+      // const currentCategoryId = <%- JSON.stringify(product.categoryId || null) %>;
+      const currentCategoryId = JSON.parse('<%= JSON.stringify(product.categoryId || null) %>');
 
       const select = document.querySelector("#categoryId");
-      select.innerHTML = "";  // Xóa option cũ nếu có
+      select.innerHTML = "";  // Xóa option cũ 
 
       // Tạo option bằng DOM để tránh lỗi EJS
       categories.forEach((item) => {
