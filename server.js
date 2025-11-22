@@ -53,8 +53,8 @@ app.get("/admin", (req, res) => {
 
 // Routes
 app.use('/admin', AdminRoutes);
-app.use('/', ProductRoutes);
-app.use('/', CategoryRoutes);
+// app.use('/', ProductRoutes);
+// app.use('/', CategoryRoutes);
 
 // ===== Start Server =====
 sequelize
