@@ -2,36 +2,42 @@ const Product = require("../models/Product");
 const Category = require("../models/Category");
 const cloudinary = require("cloudinary").v2;
 
-// Upload buffer trực tiếp lên Cloudinary với unsigned preset 
-const uploadToCloudinary = async (fileBuffer) => {
+const uploadToCloudinary = async (buffer) => {
   return new Promise((resolve, reject) => {
-    const timestamp = Math.round(Date.now() / 1000);
+    const timestamp = Math.round(new Date().getTime() / 1000);
 
+    const paramsToSign = {
+      timestamp,
+      folder: "products",
+    };
+
+    // 🔥 Tạo signature chuẩn
     const signature = cloudinary.utils.api_sign_request(
-      {
-        timestamp,
-        folder: "products",
-      },
+      paramsToSign,
       process.env.CLOUDINARY_API_SECRET
     );
 
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "products",
-        timestamp,
-        signature,
-        api_key: process.env.CLOUDINARY_API_KEY
-      },
+    // 🔥 Tạo formData cho signed upload
+    const formData = {
+      ...paramsToSign,
+      signature,
+      api_key: process.env.CLOUDINARY_API_KEY,
+    };
+
+    const uploadStream = cloudinary.uploader.upload_stream(
+      formData,
       (err, result) => {
-        if (err) return reject(err);
+        if (err) {
+          console.error("Cloudinary upload error:", err);
+          return reject(err);
+        }
         resolve(result.secure_url);
       }
     );
 
-    stream.end(fileBuffer);
+    uploadStream.end(buffer);
   });
 };
-
 
 // Get all products
 exports.getAllProducts = async (req, res) => {
