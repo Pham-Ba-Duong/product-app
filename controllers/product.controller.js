@@ -5,16 +5,33 @@ const cloudinary = require("cloudinary").v2;
 // Upload buffer trực tiếp lên Cloudinary với unsigned preset 
 const uploadToCloudinary = async (fileBuffer) => {
   return new Promise((resolve, reject) => {
+    const timestamp = Math.round(Date.now() / 1000);
+
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        timestamp,
+        folder: "products",
+      },
+      process.env.CLOUDINARY_API_SECRET
+    );
+
     const stream = cloudinary.uploader.upload_stream(
-      { upload_preset: "unsigned_products", folder: "products" },
+      {
+        folder: "products",
+        timestamp,
+        signature,
+        api_key: process.env.CLOUDINARY_API_KEY
+      },
       (err, result) => {
         if (err) return reject(err);
         resolve(result.secure_url);
       }
     );
+
     stream.end(fileBuffer);
   });
 };
+
 
 // Get all products
 exports.getAllProducts = async (req, res) => {
