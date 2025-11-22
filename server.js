@@ -32,8 +32,6 @@ cloudinary.config({
   secure: true,
 });
 
-// Multer memory storage (không tạo file temp)
-const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
