@@ -7,13 +7,16 @@ const methodOverride = require("method-override");
 const path = require("path");
 const cors = require("cors");
 
-const AdminRoutes = require('./routes/admin.routes');
-const CategoryRoutes = require('./routes/category.routes');
-const ProductRoutes = require('./routes/product.routes');
+const BodyParser = require('body-parser');
+
 
 // Database
 const sequelize = require("./config/db");
 
+// Routes
+const AdminRoutes = require('./routes/admin.routes');
+const ProductRoutes = require("./routes/product.routes.js");
+const CategoryRoutes = require("./routes/category.routes.js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,12 +40,20 @@ app.use(expressLayouts);          // enable layouts
 app.set("layout", "layout");      // default layout: views/layout.ejs
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public")));
 
+app.use(express.static('assets'));
+// app.use('/images', express.static(path.join(__dirname, 'assets/images')));
+app.use(BodyParser.json());
+app.use(BodyParser.urlencoded({ extended: true }));
 
-app.get('/admin', (req, res) => {
-  res.render('admin.page.ejs');
-})
+// Trang chủ
+app.get("/admin", async (req, res) => {
+  res.render("admin.page.ejs", { 
+    user: req.session.user || null, 
+    title: "Admin Dashboard",
+    products: [] 
+  });
+});
 
 app.use('/admin', AdminRoutes);
 app.use('/', ProductRoutes);
@@ -50,7 +61,7 @@ app.use('/', CategoryRoutes);
 
 // ===== Start Server =====
 sequelize
-  .sync({ alter: true }) 
+  .sync({ alter: true }) // code-first tự tạo bảng
   .then(() => {
     console.log("MySQL connected successfully!");
     app.listen(PORT, () =>
