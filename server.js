@@ -34,7 +34,7 @@ app.use(
 
 // ===== View Engine =====
 app.use(expressLayouts);
-app.set("layout", "layout");
+// app.set("layout", "layout");
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
