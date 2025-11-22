@@ -14,7 +14,7 @@ const BodyParser = require('body-parser');
 const sequelize = require("./config/db");
 
 // Routes
-const AdminRoutes = require('./routes/admin.routes');
+const AdminRoutes = require('./routes/admin.routes.js');
 const ProductRoutes = require("./routes/product.routes.js");
 const CategoryRoutes = require("./routes/category.routes.js");
 
