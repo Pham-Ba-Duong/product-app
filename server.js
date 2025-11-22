@@ -6,9 +6,11 @@ const methodOverride = require("method-override");
 const path = require("path");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
 
 const sequelize = require("./config/db");
 
+//Models
 const Admin = require("./models/Admin");
 const Category = require("./models/Category");
 const Product = require("./models/Product");
