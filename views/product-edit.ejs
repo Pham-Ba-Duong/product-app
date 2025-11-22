@@ -1,178 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Product</title>
-    <link
-      rel="shortcut icon"
-      href="/asset-admin/img/svg/logo.svg"
-      type="image/x-icon"
-    />
-    <link rel="stylesheet" href="/asset-admin/css/style.css" />
-  </head>
 
-  <body>
-    <div class="layer"></div>
-    <!-- ! Body -->
-    <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Product</title>
+  <link rel="stylesheet" href="/asset-admin/css/style.css" />
+  <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+</head>
 
-    <div class="page-flex">
-      <!-- ! Sidebar -->
-      <%- include('./partials/sidebar-admin')%>
+<body>
+  <div class="page-flex">
+    <%- include('./partials/sidebar-admin') %>
       <div class="main-wrapper">
-        <!-- ! Header -->
-        <header><%- include('./partials/header-admin')%></header>
-        <!-- ! Main -->
+        <header><%- include('./partials/header-admin') %></header>
         <div class="container">
-          <div class="form-container">
-            <a href="/admin/manage-product">
-              <button class="button-btn">x</button>
-            </a>
-            <form
-              action="/product/update/<%= product.id %>"
-              id="updateForm"
-              enctype="multipart/form-data"
-              method="PUT"
-            >
-              <input type="hidden" id="productItem" value="<%= product.id %>" />
-              <div class="form-group">
-                <label for="title">Product Name</label>
-                <div class="bnt"></div>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value="<%= product.name %>" 
-                  required
-                  placeholder="Enter title here"
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="description">Description</label>
-                <div class="bnt"></div>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows="5"
-                  value="<%= product.description %>"
-                  required
-                  placeholder="Write your content here..."
-                >
-                  <%= product.content %>
-                </textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="image">Product Image</label>
-                <div class="bnt"></div>
-                <input
-                  type="file"
-                  id="imageFile"
-                  name="imageFile"
-                  accept="image/*"
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="category">Category</label>
-                <div class="bnt"></div>
-                <select
-                  id="categoryId"
-                  name="categoryId"
-                  value="<%= product.category %>"
-                  required
-                ></select>
-              </div>
-
-              <div class="form-group">
-                <label for="price">Price</label>
-                <div class="bnt"></div>
-                <input type="number" id="price" name="price" accept="" value="<%= product.price %>"/>
-              </div>
-
-              <div class="form-group">
-                <button type="submit" class="submit-btn">Update Product</button>
-              </div>
-            </form>
-          </div>
+          <h2>Edit Product</h2>
+          <form id="updateForm" enctype="multipart/form-data">
+            <input type="hidden" id="productId" value="<%= product.id %>" />
+            <div>
+              <label>Name</label>
+              <input type="text" id="name" value="<%= product.name %>" required />
+            </div>
+            <div>
+              <label>Price</label>
+              <input type="number" id="price" value="<%= product.price %>" required />
+            </div>
+            <div>
+              <label>Category</label>
+              <select id="categoryId" required></select>
+            </div>
+            <div>
+              <label>Description</label>
+              <textarea id="description"><%= product.description %></textarea>
+            </div>
+            <div>
+              <label>Current Image</label><br />
+              <img src="<%= product.image %>" width="120" />
+            </div>
+            <div>
+              <label>Change Image</label>
+              <input type="file" id="imageFile" accept="image/*" />
+            </div>
+            <button type="submit">Update</button>
+          </form>
         </div>
-        <!-- ! Footer -->
-        <footer class="footer"><%- include('./partials/footer-admin')%></footer>
+        <footer><%- include('./partials/footer-admin') %></footer>
       </div>
-    </div>
+  </div>
 
-    <script src="/asset-admin/plugins/chart.min.js"></script>
-    <script src="/asset-admin/plugins/feather.min.js"></script>
-    <script src="/asset-admin/js/script.js"></script>
-    <script src="/asset-admin/ckeditor/ckeditor.js"></script>
-    <script>
-      CKEDITOR.replace("description", {
-        uiColor: "#9AB8F3",
-        extraPlugins: "filebrowser,uploadimage",
-        filebrowserBrowseUrl: "/browse",
-        filebrowserUploadMethod: "form",
-        filebrowserUploadUrl: "/uploadfile",
-        removePlugins: "exportpdf",
-        language: "vi",
+  <script>
+    CKEDITOR.replace('description');
+
+    async function loadCategories(currentId) {
+      const res = await fetch('/v1/categories');
+      const categories = await res.json();
+      const select = document.getElementById('categoryId');
+      select.innerHTML = '';
+      categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        if (c.id == currentId) opt.selected = true;
+        select.appendChild(opt);
       });
+    }
 
-      document.addEventListener("DOMContentLoaded", function () {
-        getCategoryData();
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentCategoryId = "<%= product.categoryId %>";
+      loadCategories(currentCategoryId);
+
+      const form = document.getElementById('updateForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const productId = document.getElementById('productId').value;
+        const formData = new FormData();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('price', document.getElementById('price').value);
+        formData.append('categoryId', document.getElementById('categoryId').value);
+        formData.append('description', CKEDITOR.instances.description.getData());
+        if (document.getElementById('imageFile').files.length > 0)
+          formData.append('imageFile', document.getElementById('imageFile').files[0]);
+
+        const res = await fetch(`/v1/products/${productId}`, {
+          method: 'PUT',
+          body: formData
+        });
+
+        if (res.ok) {
+          alert('Product updated!');
+          window.location.href = '/admin/manage-product';
+        } else {
+          const err = await res.json();
+          console.error(err);
+          alert('Failed to update product: ' + err.message);
+        }
       });
-
-    </script>
-
-<script>
-  CKEDITOR.replace('description');
-
-  async function loadCategories(currentId) {
-    const res = await fetch('/v1/categories');
-    const categories = await res.json();
-    const select = document.getElementById('categoryId');
-    select.innerHTML = '';
-    categories.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.id;
-      opt.textContent = c.name;
-      if (c.id == currentId) opt.selected = true;
-      select.appendChild(opt);
     });
-  }
+  </script>
+</body>
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const currentCategoryId = "<%= product.categoryId %>";
-    loadCategories(currentCategoryId);
-
-    const form = document.getElementById('updateForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const productId = document.getElementById('productId').value;
-      const formData = new FormData();
-      formData.append('name', document.getElementById('name').value);
-      formData.append('price', document.getElementById('price').value);
-      formData.append('categoryId', document.getElementById('categoryId').value);
-      formData.append('description', CKEDITOR.instances.description.getData());
-      if (document.getElementById('imageFile').files.length > 0)
-        formData.append('imageFile', document.getElementById('imageFile').files[0]);
-
-      const res = await fetch(`/v1/products/${productId}`, {
-        method: 'PUT',
-        body: formData
-      });
-
-      if (res.ok) {
-        alert('Product updated!');
-        window.location.href = '/admin/manage-product';
-      } else {
-        const err = await res.json();
-        console.error(err);
-        alert('Failed to update product: ' + err.message);
-      }
-    });
-  });
-</script>
-  </body>
 </html>
