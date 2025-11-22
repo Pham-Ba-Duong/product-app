@@ -64,7 +64,7 @@ app.use("/auth", AuthRoutes);
 app.use("/admin", requireAdmin, AdminRoutes);
 
 // Public API routes
-app.use("/v1/products", upload.single("imageFile"), ProductRoutes);
+app.use("/v1/products", ProductRoutes);
 app.use("/v1/categories", CategoryRoutes);
 
 // Redirect root
