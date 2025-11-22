@@ -40,7 +40,6 @@
                   <th>Name</th>
                   <th>Category</th>
                   <th>Date</th>
-                  <th>Comments</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -103,11 +102,6 @@
               <td>${p.name}</td>
               <td>${p.category ? p.category.name : "N/A"}</td>
               <td>${createdAt}</td>
-              <td>
-                <a href="/admin/product/${p.id}/comments">
-                  <button class="btn btn-show-comment">Show</button>
-                </a>
-              </td>
               <td>
                 <a href="/admin/product/update/${p.id}">
                   <button class="btn btn-edit">Edit</button>

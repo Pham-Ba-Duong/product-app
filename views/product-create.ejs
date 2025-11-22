@@ -1,91 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Product</title>
+  <title>New Post</title>
+  <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
   <link rel="stylesheet" href="/asset-admin/css/style.css" />
-  <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 </head>
+
 <body>
-<div class="page-flex">
-  <%- include('./partials/sidebar-admin') %>
-  <div class="main-wrapper">
-    <header><%- include('./partials/header-admin') %></header>
-    <div class="container">
-      <h2>Create Product</h2>
-      <form id="createForm" enctype="multipart/form-data">
-        <div>
-          <label>Name</label>
-          <input type="text" id="name" required />
+  <div class="layer"></div>
+  <!-- ! Body -->
+  <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+
+  <div class="page-flex">
+    <!-- ! Sidebar -->
+    <%- include('./partials/sidebar-admin')%>
+      <div class="main-wrapper">
+        <!-- ! Header -->
+        <header><%- include('./partials/header-admin')%></header>
+        <!-- ! Main -->
+        <div class="container">
+          <div class="form-container">
+            <a href="/admin/manage-post">
+              <button class="button-btn">x</button>
+            </a>
+            <form action="" id="createForm" enctype="multipart/form-data" method="POST">
+              <div class="form-group">
+                <label for="name">Product Name</label>
+                <div class="bnt"></div>
+                <input type="text" id="name" name="name" required placeholder="Enter name here" />
+              </div>
+
+              <div class="form-group">
+                <label for="txaContent">Description</label>
+                <div class="bnt"></div>
+                <textarea id="txaContent" name="txaContent" rows="5" required
+                  placeholder="Write your content here..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="image">Product Image</label>
+                <div class="bnt"></div>
+                <input type="file" id="imageFile" name="imageFile" accept="image/*" />
+              </div>
+
+              <div class="form-group">
+                <label for="category">Category</label>
+                <div class="bnt"></div>
+                <select id="categoryId" name="categoryId" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="price">Price</label>
+                <div class="bnt"></div>
+                <input type="number" id="price" name="price" accept="" />
+              </div>
+
+              <div class="form-group">
+                <button type="submit" class="submit-btn">Publish Product</button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div>
-          <label>Price</label>
-          <input type="number" id="price" required />
-        </div>
-        <div>
-          <label>Category</label>
-          <select id="categoryId" required></select>
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea id="description"></textarea>
-        </div>
-        <div>
-          <label>Image</label>
-          <input type="file" id="imageFile" accept="image/*" required />
-        </div>
-        <button type="submit">Create</button>
-      </form>
-    </div>
-    <footer><%- include('./partials/footer-admin') %></footer>
+        <!-- ! Footer -->
+        <footer class="footer"><%- include('./partials/footer-admin')%></footer>
+      </div>
   </div>
-</div>
-
-<script>
-CKEDITOR.replace('description');
-
-async function loadCategories() {
-  const res = await fetch('/v1/categories');
-  const categories = await res.json();
-  const select = document.getElementById('categoryId');
-  select.innerHTML = '';
-  categories.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = c.name;
-    select.appendChild(opt);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadCategories();
-
-  const form = document.getElementById('createForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', document.getElementById('name').value);
-    formData.append('price', document.getElementById('price').value);
-    formData.append('categoryId', document.getElementById('categoryId').value);
-    formData.append('description', CKEDITOR.instances.description.getData());
-    formData.append('imageFile', document.getElementById('imageFile').files[0]);
-
-    const res = await fetch('/v1/products', {
-      method: 'POST',
-      body: formData
+  <!-- Chart library -->
+  <script src="/asset-admin/plugins/chart.min.js"></script>
+  <!-- Icons library -->
+  <script src="/asset-admin/plugins/feather.min.js"></script>
+  <!-- Custom scripts -->
+  <script src="/asset-admin/js/script.js"></script>
+  <!-- CKEditer -->
+  <script src="/asset-admin/ckeditor/ckeditor.js"></script>
+  <script>
+    CKEDITOR.replace("txaContent", {
+      uiColor: "#9AB8F3",
+      extraPlugins: "filebrowser,uploadimage",
+      filebrowserBrowseUrl: "/browse",
+      filebrowserUploadMethod: "form",
+      filebrowserUploadUrl: "/uploadfile",
+      removePlugins: "exportpdf",
+      language: "vi",
     });
+  </script>
 
-    if (res.ok) {
-      alert('Product created!');
-      window.location.href = '/admin/product';
-    } else {
-      const err = await res.json();
-      console.error(err);
-      alert('Failed to create product: ' + err.message);
+  <script>
+    CKEDITOR.replace('description');
+
+    async function loadCategories() {
+      const res = await fetch('/v1/categories');
+      const categories = await res.json();
+      const select = document.getElementById('categoryId');
+      select.innerHTML = '';
+      categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        select.appendChild(opt);
+      });
     }
-  });
-});
-</script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCategories();
+
+      const form = document.getElementById('createForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('price', document.getElementById('price').value);
+        formData.append('categoryId', document.getElementById('categoryId').value);
+        formData.append('description', CKEDITOR.instances.description.getData());
+        formData.append('imageFile', document.getElementById('imageFile').files[0]);
+
+        const res = await fetch('/v1/products', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res.ok) {
+          alert('Product created!');
+          window.location.href = '/admin/manage-product';
+        } else {
+          const err = await res.json();
+          console.error(err);
+          alert('Failed to create product: ' + err.message);
+        }
+      });
+    });
+  </script>
 </body>
+
 </html>
