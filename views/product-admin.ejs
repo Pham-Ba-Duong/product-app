@@ -4,39 +4,32 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>All Product</title>
-    <link
-      rel="shortcut icon"
-      href="/asset-admin/img/svg/logo.svg"
-      type="image/x-icon"
-    />
+    <title>All Products</title>
+    <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
     <link rel="stylesheet" href="/asset-admin/css/style.css" />
   </head>
 
   <body>
     <div class="layer"></div>
-    <!-- ! Body -->
     <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+
     <div class="page-flex">
-      <!-- ! Sidebar -->
-      <%- include('./partials/sidebar-admin')%>
+      <%- include('./partials/sidebar-admin') %>
+
       <div class="main-wrapper">
-        <!-- ! Header -->
-        <header><%- include('./partials/header-admin')%></header>
-        <!-- ! Main -->
+        <header><%- include('./partials/header-admin') %></header>
+
         <div class="container">
           <h2 class="main-title">Products</h2>
+
           <div class="d-flex justify-content-between">
-            <a href="/admin/manage-post/create">
+            <a href="/admin/product/create">
               <button class="button-btn">New Product</button>
             </a>
           </div>
+
           <div class="users-table table-wrapper">
-            <input
-              id="searchInput"
-              type="text"
-              placeholder="Search anything..."
-            />
+            <input id="searchInput" type="text" placeholder="Search anything..." />
 
             <table class="posts-table">
               <thead>
@@ -49,25 +42,19 @@
                   <th>Action</th>
                 </tr>
               </thead>
-              <tbody id="list-post-admin">
-                <!-- Render các post-item -->
-              </tbody>
+              <tbody id="list-post-admin"></tbody>
             </table>
           </div>
 
           <div class="table-wrapper">
-            <ul class="pagination justify-content-start">
-              
-            </ul>
+            <ul class="pagination justify-content-start"></ul>
           </div>
-          <!-- end row -->
         </div>
-        <!-- ! Footer -->
-        <footer class="footer"><%- include('./partials/footer-admin')%></footer>
+
+        <footer class="footer"><%- include('./partials/footer-admin') %></footer>
       </div>
     </div>
-    <script src="/asset-admin/plugins/chart.min.js"></script>
-    <script src="/asset-admin/plugins/feather.min.js"></script>
+
     <script src="/asset-admin/js/script.js"></script>
 
     <script>
@@ -75,135 +62,92 @@
         getProductListDataAdmin();
         handleSearchProduct();
       });
-    
-      // Search product
+
+      // Search
       const handleSearchProduct = () => {
         const searchInput = document.getElementById("searchInput");
-    
+
         searchInput.addEventListener("keyup", async (e) => {
           const search = e.target.value;
-    
+
           if (search.trim() === "") {
             getProductListDataAdmin();
             return;
           }
-    
-          const productApi = `http://localhost:3000/v1/products/search?q=${search}`;
-          try {
-            const response = await fetch(productApi);
-            const data = await response.json();
-    
-            if (response.ok) {
-              renderProducts(data);
-            } else {
-              alert('Search failed: ' + data.message);
-            }
-          } catch (error) {
-            console.error("Error fetching search results:", error);
-            alert('Error searching products');
-          }
+
+          const productApi = `/api/products/search?q=${search}`;
+          const response = await fetch(productApi);
+          const data = await response.json();
+          renderProducts(data);
         });
       };
-    
-      // Render products (từ list hoặc search)
+
+      // Render product table
       const renderProducts = (products) => {
         const productList = document.getElementById("list-post-admin");
         let html = "";
-    
-        products.forEach((product) => {
-          const createdAt = new Date(product.createdAt).toLocaleDateString();
-          let image = product.image || "";  // Cloudinary URL
-    
+
+        products.forEach((p) => {
+          const createdAt = new Date(p.createdAt).toLocaleDateString();
+          let image = p.image || "/asset-admin/img/default.png";
+
           html += `
-            <tr id="trow_${product.id}">
+            <tr id="trow_${p.id}">
               <td>
-                <label class="users-table__checkbox">
-                  <div class="categories-table-img">
-                    <picture>
-                      <a href="http://localhost:3000/product/${product.id}">
-                        <img src="${image}" alt="product" />
-                      </a>
-                    </picture>
-                  </div>
-                </label>
+                <div class="categories-table-img">
+                  <img src="${image}" alt="product" />
+                </div>
               </td>
-              <td>${product.name}</td>
-              <td>${product.category ? product.category.name : 'N/A'}</td>
+              <td>${p.name}</td>
+              <td>${p.category ? p.category.name : "N/A"}</td>
               <td>${createdAt}</td>
               <td>
-                <a href="/admin/manage-product/comments" id="showComment" data-id="${product.id}">
+                <a href="/admin/product/${p.id}/comments">
                   <button class="btn btn-show-comment">Show</button>
                 </a>
               </td>
               <td>
-                <a href="/admin/manage-product/update/$$ {product.id}" id="edit" data-id=" $${product.id}">
+                <a href="/admin/product/update/${p.id}">
                   <button class="btn btn-edit">Edit</button>
-                </a> |
-                <a href="" id="delete" data-id="${product.id}">
-                  <button class="btn btn-delete">Delete</button>
                 </a>
+                |
+                <button class="btn btn-delete" data-id="${p.id}">Delete</button>
               </td>
             </tr>
           `;
         });
-    
+
         productList.innerHTML = html;
-    
-        // Event edit (redirect)
-        document.querySelectorAll(".btn-edit").forEach((button) => {
-          button.addEventListener("click", (e) => {
-            const productId = e.target.closest("a").getAttribute("data-id");
-            if (productId) {
-              window.location.href = `/admin/manage-product/update/${productId}`;
-            }
-          });
-        });
-    
-        // Event delete
-        document.querySelectorAll(".btn-delete").forEach((button) => {
-          button.addEventListener("click", async (e) => {
-            e.preventDefault();
-            const productId = e.target.closest("a").getAttribute("data-id");
-            if (!productId) return alert("Invalid product ID.");
-            await deleteProduct(productId);
+
+        // Delete event
+        document.querySelectorAll(".btn-delete").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            const id = btn.getAttribute("data-id");
+            deleteProduct(id);
           });
         });
       };
-    
+
       // Get all products
       const getProductListDataAdmin = async () => {
-        try {
-          const productApi = `http://localhost:3000/v1/products`;
-          const response = await fetch(productApi);
-          const products = await response.json();
-          renderProducts(products);
-        } catch (error) {
-          console.error("Error fetching products:", error);
-          alert('Error loading products');
-        }
+        const response = await fetch("/api/products");
+        const products = await response.json();
+        renderProducts(products);
       };
-    
+
       // Delete product
-      const deleteProduct = async (productId) => {
-        if (!confirm("Are you sure you want to delete this product?")) return;
-    
-        try {
-          const response = await fetch(`http://localhost:3000/v1/products/${productId}`, {
-            method: "DELETE",
-          });
-          if (response.ok) {
-            document.getElementById(`trow_${productId}`).remove();
-            alert("Product deleted successfully!");
-          } else {
-            const data = await response.json();
-            alert("Failed to delete: " + data.message);
-          }
-        } catch (error) {
-          console.error("Error deleting product:", error);
-          alert("Error deleting product.");
+      const deleteProduct = async (id) => {
+        if (!confirm("Are you sure?")) return;
+
+        const response = await fetch(`/api/products/${id}`, { method: "DELETE" });
+
+        if (response.ok) {
+          document.getElementById(`trow_${id}`).remove();
+          alert("Deleted!");
+        } else {
+          alert("Delete failed!");
         }
       };
     </script>
-
   </body>
 </html>

@@ -1,134 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Product</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New Product</title>
-  <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
-  <link rel="stylesheet" href="/asset-admin/css/style.css" />
-</head>
+    <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
+    <link rel="stylesheet" href="/asset-admin/css/style.css" />
 
-<body>
-  <div class="layer"></div>
-  <!-- ! Body -->
-  <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+    <!-- CKEditor -->
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+  </head>
 
-  <div class="page-flex">
-    <!-- ! Sidebar -->
-    <%- include('./partials/sidebar-admin')%>
+  <body>
+    <div class="page-flex">
+      <%- include('./partials/sidebar-admin') %>
+
       <div class="main-wrapper">
-        <!-- ! Header -->
-        <header><%- include('./partials/header-admin')%></header>
-        <!-- ! Main -->
+        <header><%- include('./partials/header-admin') %></header>
+
         <div class="container">
-          <div class="form-container">
-            <a href="/admin/manage-post">
-              <button class="button-btn">x</button>
-            </a>
-            <form action="/v1/products" id="createProductForm" enctype="multipart/form-data" method="POST">
+          <h2 class="main-title">Create New Product</h2>
+
+          <div class="form-wrapper">
+            <form id="createForm" enctype="multipart/form-data">
               <div class="form-group">
-                <label for="name">Product Name</label>
-                <input type="text" id="name" name="name" required placeholder="Enter name here" />
+                <label>Name</label>
+                <input type="text" name="name" id="name" required />
               </div>
-            
+
               <div class="form-group">
-                <label for="description">Description</label>  
-                <textarea id="description" name="description" rows="5" required placeholder="Write your content here..."></textarea>
+                <label>Price</label>
+                <input type="number" name="price" id="price" required />
               </div>
-            
+
               <div class="form-group">
-                <label for="imageFile">Product Image</label>
-                <input type="file" id="imageFile" name="imageFile" accept="image/*" />
+                <label>Category</label>
+                <select name="categoryId" id="categoryId" required>
+                  <option value="">Loading...</option>
+                </select>
               </div>
-            
+
               <div class="form-group">
-                <label for="price">Price</label>
-                <input type="number" id="price" name="price" required placeholder="Enter Price here" />  
+                <label>Description</label>
+                <textarea id="editor" name="description"></textarea>
               </div>
-            
+
               <div class="form-group">
-                <label for="categoryId">Category</label>  
-                <select id="categoryId" name="categoryId" required></select>
+                <label>Image</label>
+                <input type="file" name="imageFile" id="imageFile" accept="image/*" required />
               </div>
-            
-              <div class="form-group">
-                <button type="submit" class="submit-btn">Publish Product</button>
-              </div>
+
+              <button type="submit" class="button-btn">Create</button>
             </form>
           </div>
         </div>
-        <!-- ! Footer -->
-        <footer class="footer"><%- include('./partials/footer-admin')%></footer>
+
+        <footer class="footer"><%- include('./partials/footer-admin') %></footer>
       </div>
-  </div>
-  <!-- Chart library -->
-  <script src="/asset-admin/plugins/chart.min.js"></script>
-  <!-- Icons library -->
-  <script src="/asset-admin/plugins/feather.min.js"></script>
-  <!-- Custom scripts -->
-  <script src="/asset-admin/js/script.js"></script>
-  <!-- CKEditer -->
-  <script src="/asset-admin/ckeditor/ckeditor.js"></script>
-  <script>
-    CKEDITOR.replace("txaContent", {
-      uiColor: "#9AB8F3",
-      extraPlugins: "filebrowser,uploadimage",
-      filebrowserBrowseUrl: "/browse",
-      filebrowserUploadMethod: "form",
-      filebrowserUploadUrl: "/uploadfile",
-      removePlugins: "exportpdf",
-      language: "vi",
-    });
-  </script>
+    </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      getCategoryData();
-    });
+    <script src="/asset-admin/js/script.js"></script>
 
-    const getCategoryData = async () => {
-      try {
-        const categoryApi = "http://localhost:3000/v1/categories";
-        const response = await fetch(categoryApi);
-        const categories = await response.json();
+    <script>
+      // Load categories
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadCategories();
+        CKEDITOR.replace("editor");
+      });
 
-        const htmlCategoryAdmin = categories.map((item) => `
-      <option value="$$ {item.id}"> $${item.name}</option>
-    `).join("");
-        document.querySelector("#categoryId").innerHTML += htmlCategoryAdmin;
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        alert('Error loading categories');
-      }
-    };
+      const loadCategories = async () => {
+        try {
+          const res = await fetch("/api/categories");
+          const categories = await res.json();
 
-    document.getElementById("createProductForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
+          const select = document.getElementById("categoryId");
+          select.innerHTML = "";
 
-      const form = document.getElementById("createProductForm");
-      const formData = new FormData(form);
+          categories.forEach((c) => {
+            const opt = document.createElement("option");
+            opt.value = c.id;
+            opt.textContent = c.name;
+            select.appendChild(opt);
+          });
+        } catch (err) {
+          console.error("Error load category", err);
+        }
+      };
 
-      try {
-        const response = await fetch("http://localhost:3000/v1/products", {
+      // Handle submit
+      const form = document.getElementById("createForm");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append("name", document.getElementById("name").value);
+        formData.append("price", document.getElementById("price").value);
+        formData.append("categoryId", document.getElementById("categoryId").value);
+        formData.append("description", CKEDITOR.instances.editor.getData());
+        formData.append("imageFile", document.getElementById("imageFile").files[0]);
+
+        const res = await fetch("/api/products", {
           method: "POST",
-          body: formData
+          body: formData,
         });
 
-        if (response.ok) {
-          alert("Create product success");
-          window.location.href = "/admin/manage-product";
+        if (res.ok) {
+          alert("Product created successfully!");
+          window.location.href = "/admin/product";
         } else {
-          const errorData = await response.json();
-          alert(`Error: ${errorData.message || "Unknown error occurred"}`);
+          const err = await res.json();
+          console.error(err);
+          alert("Failed to create product!");
         }
-      } catch (error) {
-        console.error("Error creating product:", error);
-        alert('Error creating product');
-      }
-    });
-  </script>
-</body>
-
+      });
+    </script>
+  </body>
 </html>
