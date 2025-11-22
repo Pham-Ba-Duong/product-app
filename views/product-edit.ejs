@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Post</title>
+    <link
+      rel="shortcut icon"
+      href="/asset-admin/img/svg/logo.svg"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="/asset-admin/css/style.css" />
+  </head>
+
+  <body>
+    <div class="layer"></div>
+    <!-- ! Body -->
+    <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+
+    <div class="page-flex">
+      <!-- ! Sidebar -->
+      <%- include('./partials/sidebar-admin')%>
+      <div class="main-wrapper">
+        <!-- ! Header -->
+        <header><%- include('./partials/header-admin')%></header>
+        <!-- ! Main -->
+        <div class="container">
+          <div class="form-container">
+            <a href="/admin/manage-post">
+              <button class="button-btn">x</button>
+            </a>
+            <form
+              action="/post/update/<%= post._id %>"
+              id="updatePostForm"
+              enctype="multipart/form-data"
+              method="PUT"
+            >
+              <input type="hidden" id="postItem" value="<%= post._id %>" />
+              <div class="form-group">
+                <label for="title">Product Name</label>
+                <div class="bnt"></div>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value="<%= post.title %>" 
+                  required
+                  placeholder="Enter title here"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="txaContent"></label>
+                <div class="bnt"></div>
+                <textarea
+                  id="txaContent"
+                  name="txaContent"
+                  rows="5"
+                  value="<%= post.content %>"
+                  required
+                  placeholder="Write your content here..."
+                >
+                  <%= post.content %>
+                </textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="image">Product Image</label>
+                <div class="bnt"></div>
+                <input
+                  type="file"
+                  id="imageFile"
+                  name="imageFile"
+                  accept="image/*"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="category">Category</label>
+                <div class="bnt"></div>
+                <select
+                  id="category"
+                  name="category"
+                  value="<%= post.category %>"
+                  required
+                ></select>
+              </div>
+
+              <div class="form-group">
+                <button type="submit" class="submit-btn">Update Product</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- ! Footer -->
+        <footer class="footer"><%- include('./partials/footer-admin')%></footer>
+      </div>
+    </div>
+
+    <script src="/asset-admin/plugins/chart.min.js"></script>
+    <script src="/asset-admin/plugins/feather.min.js"></script>
+    <script src="/asset-admin/js/script.js"></script>
+    <script src="/asset-admin/ckeditor/ckeditor.js"></script>
+    <script>
+      CKEDITOR.replace("txaContent", {
+        uiColor: "#9AB8F3",
+        extraPlugins: "filebrowser,uploadimage",
+        filebrowserBrowseUrl: "/browse",
+        filebrowserUploadMethod: "form",
+        filebrowserUploadUrl: "/uploadfile",
+        removePlugins: "exportpdf",
+        language: "vi",
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        getCategoryData();
+      });
+
+
+      const getCategoryData = async () => {
+        try {
+          const categoryApi = "http://localhost:8000/v1/category";
+
+          const response = await fetch(categoryApi);
+          const categories = await response.json();
+
+          const htmlCategoryAdmin = categories
+            .map(
+              (item) => `
+                 <option value="${item._id}">${item.name}</option>
+              `
+            )
+            .join("");
+          document.querySelector("#category").innerHTML += htmlCategoryAdmin;
+
+          feather.replace();
+        } catch (error) {
+          console.error("Error fetching category data:", error);
+        }
+      };
+
+      document
+        .getElementById("updatePostForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const form = document.getElementById("updatePostForm");
+          const formData = new FormData(form); 
+
+          const postId = document.getElementById("postItem").value;
+
+          try {
+            const response = await fetch(
+              `http://localhost:8000/post/update/${postId}`,
+              {
+                method: "PUT",
+                body: formData, 
+              }
+            );
+
+            if (response.ok) {
+              alert("Update post success");
+              window.location.href = "/admin/manage-post";
+            } else {
+              const errorData = await response.json();
+              alert(`Error: ${errorData.message || "Unknown error occurred"}`);
+            }
+          } catch (error) {
+            console.error("Error updating post:", error);
+          }
+        });
+    </script>
+  </body>
+</html>

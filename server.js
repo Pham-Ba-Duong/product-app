@@ -7,12 +7,13 @@ const methodOverride = require("method-override");
 const path = require("path");
 const cors = require("cors");
 
+const AdminRoutes = require('./routes/admin.routes');
+const CategoryRoutes = require('./routes/category.routes');
+const ProductRoutes = require('./routes/product.routes');
+
 // Database
 const sequelize = require("./config/db");
 
-// Routes
-const authRoutes = require("./routes/auth");
-const productRoutes = require("./routes/products");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,22 +39,18 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// ===== Routes =====
-app.use("/auth", authRoutes);
-app.use("/products", productRoutes);
 
-// Trang chủ
-app.get("/", async (req, res) => {
-  res.render("index", { 
-    user: req.session.user || null, 
-    title: "Trang chủ",
-    products: [] // mặc định rỗng, bạn có thể fetch từ DB
-  });
-});
+app.get('/admin', (req, res) => {
+  res.render('admin.page.ejs');
+})
+
+app.use('/admin', AdminRoutes);
+app.use('/', ProductRoutes);
+app.use('/', CategoryRoutes);
 
 // ===== Start Server =====
 sequelize
-  .sync({ alter: true }) // code-first tự tạo bảng
+  .sync({ alter: true }) 
   .then(() => {
     console.log("MySQL connected successfully!");
     app.listen(PORT, () =>

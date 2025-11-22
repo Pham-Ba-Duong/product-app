@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Category</title>
+    <link
+      rel="shortcut icon"
+      href="/asset-admin/img/svg/logo.svg"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="/asset-admin/css/style.min.css" />
+    <link rel="stylesheet" href="/asset-admin/css/style.css" />
+  </head>
+
+  <body>
+    <div class="layer"></div>
+    <!-- ! Body -->
+    <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+    <div class="page-flex">
+      <!-- ! Sidebar -->
+      <%- include('./partials/sidebar-admin')%>
+      <div class="main-wrapper">
+        <!-- ! Header -->
+        <header><%- include('./partials/header-admin')%></header>
+        <!-- ! Main -->
+        <div class="form-container">
+          <a href="/admin/manage-category">
+            <button class="button-btn">x</button>
+          </a>
+          <form
+            action="/category/update/<%= category._id %>"
+            method="PUT"
+            id="updateCategoryForm"
+          >
+            <input
+              type="hidden"
+              id="categoryItem"
+              value="<%= category._id %>"
+            />
+            <div class="form-group">
+              <label for="category-name">Category Name</label>
+              <div class="bnt"></div>
+              <input
+                type="text"
+                id="category-name"
+                name="categoryName"
+                value="<%= category.name %>"
+              />
+            </div>
+
+            <div class="form-group">
+              <button type="submit" class="submit-btn">Update Category</button>
+            </div>
+          </form>
+        </div>
+        <!-- ! Footer -->
+        <footer class="footer"><%- include('./partials/footer-admin')%></footer>
+      </div>
+    </div>
+    <script src="/asset-admin/plugins/chart.min.js"></script>
+    <script src="/asset-admin/plugins/feather.min.js"></script>
+    <script src="/asset-admin/js/script.js"></script>
+
+    <script>
+      document
+        .getElementById("updateCategoryForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const categoryId = document.getElementById("categoryItem").value;
+          const categoryName = document.getElementById("category-name").value;
+
+          try {
+            const response = await fetch(
+              `http://localhost:8000/category/update/${categoryId}`,
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ categoryName }),
+              }
+            );
+
+            if (response.ok) {
+              alert("Update category success");
+              window.location.href = "/admin/manage-category";
+            } else {
+              const errorData = await response.json();
+              alert(`Error: ${errorData.message || "Unknown error occurred"}`);
+            }
+          } catch (error) {
+            console.error("Error updating category:", error);
+          }
+        });
+    </script>
+  </body>
+</html>
