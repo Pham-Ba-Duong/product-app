@@ -10,7 +10,14 @@
 
     <!-- CKEditor -->
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        feather.replace();
+      });
+    </script>
   </head>
+
 
   <body>
     <div class="page-flex">
@@ -61,6 +68,17 @@
     </div>
 
     <script src="/asset-admin/js/script.js"></script>
+    <script>
+      CKEDITOR.replace('description', {
+        height: 300,
+        on: {
+          instanceReady: function() {
+            this.container.hide();
+            this.container.show();
+          }
+        }
+      });
+    </script>
 
     <script>
       // Load categories

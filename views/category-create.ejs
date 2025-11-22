@@ -58,7 +58,7 @@
         const categoryName = document.getElementById('categoryName').value;
     
         try {
-          const response = await fetch("/api/categories", {
+          const response = await fetch("/v1/categories", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: categoryName }),

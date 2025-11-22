@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>All Products</title>
-    <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
-    <link rel="stylesheet" href="/asset-admin/css/style.css" />
-  </head>
 
-  <body>
-    <div class="layer"></div>
-    <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Products</title>
+  <link rel="shortcut icon" href="/asset-admin/img/svg/logo.svg" type="image/x-icon" />
+  <link rel="stylesheet" href="/asset-admin/css/style.css" />
+</head>
+<script src="https://unpkg.com/feather-icons"></script>
 
-    <div class="page-flex">
-      <%- include('./partials/sidebar-admin') %>
+<body>
+  <div class="layer"></div>
+  <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
+
+  <div class="page-flex">
+    <%- include('./partials/sidebar-admin') %>
 
       <div class="main-wrapper">
         <header><%- include('./partials/header-admin') %></header>
@@ -53,45 +55,45 @@
 
         <footer class="footer"><%- include('./partials/footer-admin') %></footer>
       </div>
-    </div>
+  </div>
 
-    <script src="/asset-admin/js/script.js"></script>
+  <script src="/asset-admin/js/script.js"></script>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        getProductListDataAdmin();
-        handleSearchProduct();
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      getProductListDataAdmin();
+      handleSearchProduct();
+    });
+
+    // Search
+    const handleSearchProduct = () => {
+      const searchInput = document.getElementById("searchInput");
+
+      searchInput.addEventListener("keyup", async (e) => {
+        const search = e.target.value;
+
+        if (search.trim() === "") {
+          getProductListDataAdmin();
+          return;
+        }
+
+        const productApi = `/api/products/search?q=${search}`;
+        const response = await fetch(productApi);
+        const data = await response.json();
+        renderProducts(data);
       });
+    };
 
-      // Search
-      const handleSearchProduct = () => {
-        const searchInput = document.getElementById("searchInput");
+    // Render product table
+    const renderProducts = (products) => {
+      const productList = document.getElementById("list-post-admin");
+      let html = "";
 
-        searchInput.addEventListener("keyup", async (e) => {
-          const search = e.target.value;
+      products.forEach((p) => {
+        const createdAt = new Date(p.createdAt).toLocaleDateString();
+        let image = p.image || "/asset-admin/img/default.png";
 
-          if (search.trim() === "") {
-            getProductListDataAdmin();
-            return;
-          }
-
-          const productApi = `/api/products/search?q=${search}`;
-          const response = await fetch(productApi);
-          const data = await response.json();
-          renderProducts(data);
-        });
-      };
-
-      // Render product table
-      const renderProducts = (products) => {
-        const productList = document.getElementById("list-post-admin");
-        let html = "";
-
-        products.forEach((p) => {
-          const createdAt = new Date(p.createdAt).toLocaleDateString();
-          let image = p.image || "/asset-admin/img/default.png";
-
-          html += `
+        html += `
             <tr id="trow_${p.id}">
               <td>
                 <div class="categories-table-img">
@@ -115,39 +117,40 @@
               </td>
             </tr>
           `;
+      });
+
+      productList.innerHTML = html;
+
+      // Delete event
+      document.querySelectorAll(".btn-delete").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          const id = btn.getAttribute("data-id");
+          deleteProduct(id);
         });
+      });
+    };
 
-        productList.innerHTML = html;
+    // Get all products
+    const getProductListDataAdmin = async () => {
+      const response = await fetch("/api/products");
+      const products = await response.json();
+      renderProducts(products);
+    };
 
-        // Delete event
-        document.querySelectorAll(".btn-delete").forEach((btn) => {
-          btn.addEventListener("click", async (e) => {
-            const id = btn.getAttribute("data-id");
-            deleteProduct(id);
-          });
-        });
-      };
+    // Delete product
+    const deleteProduct = async (id) => {
+      if (!confirm("Are you sure?")) return;
 
-      // Get all products
-      const getProductListDataAdmin = async () => {
-        const response = await fetch("/api/products");
-        const products = await response.json();
-        renderProducts(products);
-      };
+      const response = await fetch(`/api/products/${id}`, { method: "DELETE" });
 
-      // Delete product
-      const deleteProduct = async (id) => {
-        if (!confirm("Are you sure?")) return;
+      if (response.ok) {
+        document.getElementById(`trow_${id}`).remove();
+        alert("Deleted!");
+      } else {
+        alert("Delete failed!");
+      }
+    };
+  </script>
+</body>
 
-        const response = await fetch(`/api/products/${id}`, { method: "DELETE" });
-
-        if (response.ok) {
-          document.getElementById(`trow_${id}`).remove();
-          alert("Deleted!");
-        } else {
-          alert("Delete failed!");
-        }
-      };
-    </script>
-  </body>
 </html>

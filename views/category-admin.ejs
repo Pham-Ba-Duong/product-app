@@ -67,7 +67,7 @@
     
       const getPopularCategoryDataAdmin = async () => {
           try {
-              const response = await fetch("/api/categories");
+              const response = await fetch("/v1/categories");
               const categories = await response.json();
     
               const htmlCategoryAdmin = categories.map(
@@ -121,7 +121,7 @@
           );
           if (!confirmDelete) return;
     
-          const response = await fetch(`/api/categories/${categoryId}`, {
+          const response = await fetch(`/v1/categories/${categoryId}`, {
             method: "DELETE",
           });
     

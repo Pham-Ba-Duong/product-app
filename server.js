@@ -80,8 +80,8 @@ app.use("/auth", AuthRoutes);
 app.use("/admin", requireAdmin, AdminRoutes);
 
 // API công khai
-app.use("/api/products", upload.single("imageFile"), ProductRoutes);
-app.use("/api/categories", CategoryRoutes);
+app.use("/v1/products", upload.single("imageFile"), ProductRoutes);
+app.use("/v1/categories", CategoryRoutes);
 
 // Redirect trang chủ
 app.get("/", requireAdmin, (req, res) => {
