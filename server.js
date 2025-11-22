@@ -8,9 +8,6 @@ const path = require("path");
 const cors = require("cors");
 
 const BodyParser = require('body-parser');
-
-
-// Database
 const sequelize = require("./config/db");
 
 // Routes
@@ -36,18 +33,17 @@ app.use(
 );
 
 // ===== View Engine =====
-app.use(expressLayouts);          // enable layouts
-app.set("layout", "layout");      // default layout: views/layout.ejs
+app.use(expressLayouts);
+app.set("layout", "layout");
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static('assets'));
-// app.use('/images', express.static(path.join(__dirname, 'assets/images')));
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
 
 // Trang chủ
-app.get("/admin", async (req, res) => {
+app.get("/admin", (req, res) => {
   res.render("admin.page.ejs", { 
     user: req.session.user || null, 
     title: "Admin Dashboard",
@@ -55,13 +51,14 @@ app.get("/admin", async (req, res) => {
   });
 });
 
+// Routes
 app.use('/admin', AdminRoutes);
 app.use('/', ProductRoutes);
 app.use('/', CategoryRoutes);
 
 // ===== Start Server =====
 sequelize
-  .sync({ alter: true }) // code-first tự tạo bảng
+  .sync({ alter: true })
   .then(() => {
     console.log("MySQL connected successfully!");
     app.listen(PORT, () =>
