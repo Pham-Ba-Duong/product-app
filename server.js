@@ -78,6 +78,18 @@ app.get("/admin/product/update/:id", requireAdmin, async (req, res) => {
   }
 });
 
+// Category edit page
+app.get("/admin/category/update/:id", requireAdmin, async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id,);
+    if (!category) return res.status(404).send("Không tìm thấy danh mục");
+    res.render("category-edit", { category });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi server");
+  }
+});
+
 // Tạo default admin
 async function createDefaultAdmin() {
   try {
