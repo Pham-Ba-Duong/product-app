@@ -11,13 +11,13 @@ const uploadToCloudinary = async (buffer) => {
       folder: "products",
     };
 
-    // 🔥 Tạo signature chuẩn
+    // Tạo signature chuẩn
     const signature = cloudinary.utils.api_sign_request(
       paramsToSign,
       process.env.CLOUDINARY_API_SECRET
     );
 
-    // 🔥 Tạo formData cho signed upload
+    // Tạo formData cho signed upload
     const formData = {
       ...paramsToSign,
       signature,

@@ -11,7 +11,7 @@ const Product = sequelize.define("Product", {
     type: DataTypes.TEXT
   },
   image: {
-    type: DataTypes.STRING // lưu URL hoặc tên file
+    type: DataTypes.STRING
   },
   price: {
     type: DataTypes.FLOAT,

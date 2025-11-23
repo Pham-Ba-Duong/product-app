@@ -41,6 +41,7 @@ exports.logout = (req, res) => {
       console.error(err);
       return res.status(500).send("Error logging out");
     }
+    res.clearCookie("connect.sid");
     res.redirect("/login");
   });
 };
