@@ -14,16 +14,12 @@
 
 <body>
   <div class="layer"></div>
-  <!-- ! Body -->
   <a class="skip-link sr-only" href="#skip-target">Skip to content</a>
-
   <div class="page-flex">
-    <!-- ! Sidebar -->
     <%- include('./partials/sidebar-admin')%>
       <div class="main-wrapper">
         <!-- ! Header -->
         <header><%- include('./partials/header-admin')%></header>
-        <!-- ! Main -->
         <div class="container">
           <div class="form-container">
             <a href="/admin/manage-product">
@@ -39,7 +35,7 @@
               <div class="form-group">
                 <label for="price">Price</label>
                 <div class="bnt"></div>
-                <input type="number" id="price" name="price" required placeholder="Enter short content here" />
+                <input type="number" id="price" name="price" required />
               </div>
 
               <div class="form-group">
@@ -72,11 +68,8 @@
         <footer class="footer"><%- include('./partials/footer-admin')%></footer>
       </div>
   </div>
-  <!-- Chart library -->
   <script src="/asset-admin/plugins/chart.min.js"></script>
-  <!-- Icons library -->
   <script src="/asset-admin/plugins/feather.min.js"></script>
-  <!-- Custom scripts -->
   <script src="/asset-admin/js/script.js"></script>
 
   <script> CKEDITOR.replace('description'); async function loadCategories() { const res = await fetch('/v1/categories'); const categories = await res.json(); const select = document.getElementById('categoryId'); select.innerHTML = ''; categories.forEach(c => { const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.name; select.appendChild(opt); }); } document.addEventListener('DOMContentLoaded', () => { loadCategories(); const form = document.getElementById('createForm'); form.addEventListener('submit', async (e) => { e.preventDefault(); const formData = new FormData(); formData.append('name', document.getElementById('name').value); formData.append('price', document.getElementById('price').value); formData.append('categoryId', document.getElementById('categoryId').value); formData.append('description', CKEDITOR.instances.description.getData()); formData.append('imageFile', document.getElementById('imageFile').files[0]); const res = await fetch('/v1/products', { method: 'POST', body: formData }); if (res.ok) { alert('Product created!'); window.location.href = '/admin/manage-product'; } else { const err = await res.json(); console.error(err); alert('Failed to create product: ' + err.message); } }); }); </script>
